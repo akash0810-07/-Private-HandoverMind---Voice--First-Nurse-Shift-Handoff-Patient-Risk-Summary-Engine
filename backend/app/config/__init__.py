@@ -32,7 +32,10 @@ class BaseConfig:
     JWT_TOKEN_LOCATION = ["headers"]
 
     # --- CORS ---
-    CORS_ORIGINS = os.environ.get("CORS_ORIGINS", "http://localhost:5173").split(",")
+    CORS_ORIGINS = [
+        origin if "://" in origin else f"https://{origin}"
+        for origin in os.environ.get("CORS_ORIGINS", "http://localhost:5173").split(",")
+    ]
 
     # --- File uploads ---
     MAX_CONTENT_LENGTH = int(os.environ.get("MAX_UPLOAD_MB", 25)) * 1024 * 1024
