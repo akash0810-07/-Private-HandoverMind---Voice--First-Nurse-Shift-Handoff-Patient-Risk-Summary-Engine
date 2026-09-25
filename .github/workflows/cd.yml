@@ -1,0 +1,80 @@
+name: CD
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    branches: [main]
+    types: [completed]
+
+jobs:
+  deploy:
+    name: Build, push & deploy
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.REGISTRY_URL }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Build & push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          push: true
+          tags: ${{ secrets.REGISTRY_URL }}/handovermind-backend:${{ github.sha }},${{ secrets.REGISTRY_URL }}/handovermind-backend:latest
+
+      - name: Build & push frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          push: true
+          build-args: |
+            VITE_API_BASE_URL=${{ secrets.PRODUCTION_API_BASE_URL }}
+          tags: ${{ secrets.REGISTRY_URL }}/handovermind-frontend:${{ github.sha }},${{ secrets.REGISTRY_URL }}/handovermind-frontend:latest
+
+      - name: Deploy to production host
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          echo "Deploying handovermind-backend:${{ github.sha }} and handovermind-frontend:${{ github.sha }}"
+          echo "Replace this step with your actual deploy mechanism:"
+          echo "  - SSH + docker compose pull && up -d, OR"
+          echo "  - a managed platform's CLI (Render/Fly/ECS/Azure/GCP), OR"
+          echo "  - a Kubernetes rollout (kubectl set image ...)"
+          # Example SSH-based deploy (uncomment and adapt):
+          # echo "$DEPLOY_SSH_KEY" > deploy_key && chmod 600 deploy_key
+          # ssh -i deploy_key -o StrictHostKeyChecking=no user@$DEPLOY_HOST \
+          #   "cd /opt/handovermind && docker compose pull && docker compose up -d"
+
+      - name: Health check after deploy
+        run: |
+          echo "Checking ${{ secrets.PRODUCTION_API_BASE_URL }}/health"
+          for i in 1 2 3 4 5; do
+            if curl -fsS "${{ secrets.PRODUCTION_API_BASE_URL }}/health"; then
+              echo "Health check passed."
+              exit 0
+            fi
+            echo "Attempt $i failed, retrying in 5s..."
+            sleep 5
+          done
+          echo "Health check failed after deploy."
+          exit 1
+
+  rollback_on_failure:
+    name: Rollback to previous image on failed health check
+    runs-on: ubuntu-latest
+    needs: [deploy]
+    if: ${{ failure() }}
+    steps:
+      - name: Roll back deployment
+        run: |
+          echo "Deployment health check failed — rolling back to the ':stable' tagged images."
+          echo "Replace with your actual rollback command, e.g.:"
+          echo "  ssh user@host 'cd /opt/handovermind && docker compose pull backend:stable frontend:stable && docker compose up -d'"
