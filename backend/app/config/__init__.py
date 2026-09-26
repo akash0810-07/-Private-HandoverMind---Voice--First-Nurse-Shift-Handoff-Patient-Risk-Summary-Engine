@@ -32,10 +32,7 @@ class BaseConfig:
     JWT_TOKEN_LOCATION = ["headers"]
 
     # --- CORS ---
-    CORS_ORIGINS = [
-        origin if "://" in origin else f"https://{origin}"
-        for origin in os.environ.get("CORS_ORIGINS", "http://localhost:5173").split(",")
-    ]
+    CORS_ORIGINS = os.environ.get("CORS_ORIGINS", "http://localhost:5173").split(",")
 
     # --- File uploads ---
     MAX_CONTENT_LENGTH = int(os.environ.get("MAX_UPLOAD_MB", 25)) * 1024 * 1024
@@ -57,6 +54,12 @@ class BaseConfig:
 
     # --- Retention ---
     AUDIO_RETENTION_DAYS = int(os.environ.get("AUDIO_RETENTION_DAYS", 30))
+
+    # --- Boot-time convenience for deployments with no separate shell step
+    # (e.g. Render). Off by default; a real production deployment with its
+    # own migration step should leave these false and run Alembic instead.
+    AUTO_CREATE_TABLES = _bool("AUTO_CREATE_TABLES", "false")
+    AUTO_SEED_DEMO_DATA = _bool("AUTO_SEED_DEMO_DATA", "false")
 
 
 class DevelopmentConfig(BaseConfig):
