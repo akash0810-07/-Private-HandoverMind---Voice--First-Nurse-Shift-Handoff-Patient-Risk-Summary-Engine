@@ -30,7 +30,13 @@ def record_handoff():
     if not nurse:
         return jsonify({"error": "unauthorized"}), 401
     if not nurse.ward_id:
-        return jsonify({"error": "validation_error", "message": "Nurse has no assigned ward."}), 400
+       return jsonify({
+    "error": "validation_error",
+    "message": (
+        "Unsupported audio type. Allowed: "
+        f"{sorted(current_app.config['ALLOWED_AUDIO_EXTENSIONS'])}"
+    ),
+}), 400
 
     if "audio" not in request.files:
         return jsonify({"error": "validation_error", "message": "No audio file provided."}), 400
@@ -99,7 +105,10 @@ def get_handoff_summary(recording_id):
     nurse = get_current_nurse()
     recording = HandoffRecording.query.get(recording_id)
     if not recording:
-        return jsonify({"error": "not_found"}), 404
+        return jsonify({
+    "error": "forbidden",
+    "message": "Your account does not have access to this ward."
+}), 403
 
     claims = get_jwt()
     if claims.get("role") != "ADMIN" and recording.ward_id != nurse.ward_id:
