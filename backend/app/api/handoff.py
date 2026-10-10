@@ -29,14 +29,12 @@ def record_handoff():
     nurse = get_current_nurse()
     if not nurse:
         return jsonify({"error": "unauthorized"}), 401
+   
     if not nurse.ward_id:
-       return jsonify({
-    "error": "validation_error",
-    "message": (
-        "Unsupported audio type. Allowed: "
-        f"{sorted(current_app.config['ALLOWED_AUDIO_EXTENSIONS'])}"
-    ),
-}), 400
+        return jsonify({
+            "error": "validation_error",
+            "message": "Nurse is not assigned to a ward.",
+        }), 400
 
     if "audio" not in request.files:
         return jsonify({"error": "validation_error", "message": "No audio file provided."}), 400
