@@ -16,6 +16,9 @@ def get_job(job_id):
         return jsonify({"error": "not_found"}), 404
 
     if claims.get("role") != "ADMIN" and job.recording.ward_id != nurse.ward_id:
-        return jsonify({"error": "forbidden", "message": "Your account does not have access to this ward."}), 403
+        return jsonify({
+            "error": "forbidden",
+            "message": "Your account does not have access to this ward.",
+        }), 403
 
     return jsonify(job.to_dict())
