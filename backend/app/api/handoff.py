@@ -29,7 +29,7 @@ def record_handoff():
     nurse = get_current_nurse()
     if not nurse:
         return jsonify({"error": "unauthorized"}), 401
-   
+
     if not nurse.ward_id:
         return jsonify({
             "error": "validation_error",
@@ -43,7 +43,6 @@ def record_handoff():
     if audio_file.filename == "":
         return jsonify({"error": "validation_error", "message": "Empty filename."}), 400
 
-   
     if not _allowed_file(audio_file.filename):
         return jsonify({
             "error": "validation_error",
@@ -106,13 +105,13 @@ def record_handoff():
 def get_handoff_summary(recording_id):
     nurse = get_current_nurse()
     recording = HandoffRecording.query.get(recording_id)
-    
+
     if not recording:
         return jsonify({"error": "not_found"}), 404
 
     claims = get_jwt()
     if claims.get("role") != "ADMIN" and recording.ward_id != nurse.ward_id:
-       
+
         return jsonify({
             "error": "forbidden",
             "message": "Your account does not have access to this ward.",

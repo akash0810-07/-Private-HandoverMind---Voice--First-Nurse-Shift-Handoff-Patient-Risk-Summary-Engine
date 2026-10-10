@@ -44,7 +44,6 @@ class AIProcessingPipeline:
         self.max_retries = max_retries
         self.risk_service = RiskDetectionService()
 
-    
     def _log(
         self,
         recording_id,
@@ -82,9 +81,8 @@ class AIProcessingPipeline:
             db.session.add(job)
             db.session.commit()
 
-            
             stt_result = self.stt_provider.transcribe(audio_path, content_type)
-            
+
             self._log(
                 recording.id,
                 request_id,
