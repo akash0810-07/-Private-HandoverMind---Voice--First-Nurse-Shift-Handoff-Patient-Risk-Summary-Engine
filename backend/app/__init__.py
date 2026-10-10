@@ -23,8 +23,6 @@ def create_app(config_object=None):
     def check_revoked(jwt_header, jwt_payload):
         return is_token_revoked(jwt_header, jwt_payload)
 
-    
-   
     @jwt.expired_token_loader
     def expired_token_callback(jwt_header, jwt_payload):
         return jsonify({
