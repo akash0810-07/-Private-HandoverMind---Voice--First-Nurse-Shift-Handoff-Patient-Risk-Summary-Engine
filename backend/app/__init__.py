@@ -25,7 +25,10 @@ def create_app(config_object=None):
 
     @jwt.expired_token_loader
     def expired_token_callback(jwt_header, jwt_payload):
-        return jsonify({"error": "token_expired", "message": "Your session has expired. Please log in again."}), 401
+        return jsonify({
+    "error": "token_expired",
+    "message": "Your session has expired. Please log in again."
+}), 401
 
     @jwt.revoked_token_loader
     def revoked_token_callback(jwt_header, jwt_payload):
