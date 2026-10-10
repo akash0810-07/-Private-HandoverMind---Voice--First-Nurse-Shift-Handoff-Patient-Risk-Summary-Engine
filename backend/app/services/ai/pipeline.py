@@ -44,13 +44,21 @@ class AIProcessingPipeline:
         self.max_retries = max_retries
         self.risk_service = RiskDetectionService()
 
-    def _log(self, recording_id, request_id, stage, provider, model, status,
-              duration_ms, token_usage=None, retry_count=0, validation_result=None):
-        db.session.add(AIProcessingLog(
-            recording_id=recording_id, request_id=request_id, stage=stage,
-            provider=provider, model=model, status=status, duration_ms=duration_ms,
-            token_usage=token_usage, retry_count=retry_count, validation_result=validation_result,
-        ))
+    def _log(
+    self, recording_id, request_id, stage, provider, model, status,
+    duration_ms, token_usage=None, retry_count=0, validation_result=None):
+    db.session.add(AIProcessingLog(
+        recording_id=recording_id,
+        request_id=request_id,
+        stage=stage,
+        provider=provider,
+        model=model,
+        status=status,
+        duration_ms=duration_ms,
+        token_usage=token_usage,
+        retry_count=retry_count,
+        validation_result=validation_result,
+    ))
 
     def run(self, recording: HandoffRecording, audio_path: str, content_type: str) -> ProcessingJob:
         job = recording.processing_job or ProcessingJob(recording_id=recording.id)
