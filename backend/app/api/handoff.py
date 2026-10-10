@@ -1,4 +1,3 @@
-import os
 from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import jwt_required, get_jwt
 
@@ -49,7 +48,7 @@ def record_handoff():
     storage = get_storage_backend()
     try:
         location = storage.save(audio_file, audio_file.filename)
-    except OSError as exc:
+    except OSError:
         return jsonify({"error": "storage_failure", "message": "Could not store audio file."}), 502
 
     recording = HandoffRecording(
