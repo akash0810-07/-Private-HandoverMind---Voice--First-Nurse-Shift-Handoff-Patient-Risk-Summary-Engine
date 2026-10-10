@@ -23,12 +23,14 @@ def create_app(config_object=None):
     def check_revoked(jwt_header, jwt_payload):
         return is_token_revoked(jwt_header, jwt_payload)
 
+    
+   
     @jwt.expired_token_loader
     def expired_token_callback(jwt_header, jwt_payload):
         return jsonify({
-    "error": "token_expired",
-    "message": "Your session has expired. Please log in again."
-}), 401
+            "error": "token_expired",
+            "message": "Your session has expired. Please log in again.",
+        }), 401
 
     @jwt.revoked_token_loader
     def revoked_token_callback(jwt_header, jwt_payload):
