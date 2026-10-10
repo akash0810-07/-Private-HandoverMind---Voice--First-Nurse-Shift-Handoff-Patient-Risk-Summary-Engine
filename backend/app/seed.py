@@ -17,7 +17,11 @@ WARD_NAMES = ["General Ward A", "ICU", "Orthopedics"]
 CONDITIONS_BY_RISK = {
     "LOW": ["Post-operative recovery, stable", "Routine observation", "Mild viral infection"],
     "MEDIUM": ["Pneumonia, responding to treatment", "Post-fall observation", "Controlled hypertension"],
-    "HIGH": ["Pneumonia with breathing difficulty", "Suspected sepsis", "Acute confusion, unresponsive episode"],
+    "HIGH": [
+        "Pneumonia with breathing difficulty",
+        "Suspected sepsis",
+        "Acute confusion, unresponsive episode",
+    ],
 }
 
 RISK_INDICATOR_POOL = {
