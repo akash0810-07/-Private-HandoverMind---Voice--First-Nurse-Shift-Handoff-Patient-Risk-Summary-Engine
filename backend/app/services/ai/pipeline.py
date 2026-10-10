@@ -64,7 +64,7 @@ class AIProcessingPipeline:
             db.session.add(job)
             db.session.commit()
 
-            t0 = time.time()
+            
             stt_result = self.stt_provider.transcribe(audio_path, content_type)
             self._log(recording.id, request_id, "STT", self.stt_provider.name, None,
                        "SUCCESS", stt_result.duration_ms)
