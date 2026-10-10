@@ -37,7 +37,10 @@ def edit_summary(summary_id):
     if not summary:
         return jsonify({"error": "not_found"}), 404
     if not _check_ward_access(summary, claims, nurse):
-        return jsonify({"error": "forbidden", "message": "Your account does not have access to this ward."}), 403
+        return jsonify({
+            "error": "forbidden",
+            "message": "Your account does not have access to this ward.",
+        }), 403
 
     try:
         data = _update_schema.load(request.get_json(silent=True) or {}, partial=True)
