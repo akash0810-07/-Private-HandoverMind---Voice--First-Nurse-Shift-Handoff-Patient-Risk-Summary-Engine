@@ -4,6 +4,12 @@ also be called automatically on app boot (see wsgi.py, AUTO_SEED_DEMO_DATA)
 for deployments like Render where there's no separate shell step to run a
 script. Idempotent: does nothing if a Ward already exists.
 """
+import sys
+from pathlib import Path
+
+BACKEND_DIR = Path(__file__).resolve().parent.parent / "backend"
+sys.path.insert(0, str(BACKEND_DIR))
+
 import random
 from faker import Faker
 
