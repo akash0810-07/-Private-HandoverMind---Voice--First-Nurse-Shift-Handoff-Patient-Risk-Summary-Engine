@@ -10,24 +10,28 @@ jobs:
   deploy:
     name: Build, push & deploy
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     environment: production
     steps:
       - uses: actions/checkout@v4
 
-      - name: Log in to container registry
+      - name: Log in to GHCR
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         uses: docker/login-action@v3
         with:
-          registry: ${{ secrets.REGISTRY_URL }}
-          username: ${{ secrets.REGISTRY_USERNAME }}
-          password: ${{ secrets.REGISTRY_PASSWORD }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build & push backend image
         uses: docker/build-push-action@v6
         with:
           context: ./backend
           push: true
-          tags: ${{ secrets.REGISTRY_URL }}/handovermind-backend:${{ github.sha }},${{ secrets.REGISTRY_URL }}/handovermind-backend:latest
+          tags: ghcr.io/${{ github.repository_owner }}/handovermind-backend:${{ github.event.workflow_run.head_sha }},ghcr.io/${{ github.repository_owner }}/handovermind-backend:latest
 
       - name: Build & push frontend image
         uses: docker/build-push-action@v6
@@ -36,14 +40,14 @@ jobs:
           push: true
           build-args: |
             VITE_API_BASE_URL=${{ secrets.PRODUCTION_API_BASE_URL }}
-          tags: ${{ secrets.REGISTRY_URL }}/handovermind-frontend:${{ github.sha }},${{ secrets.REGISTRY_URL }}/handovermind-frontend:latest
+          tags: ghcr.io/${{ github.repository_owner }}/handovermind-frontend:${{ github.event.workflow_run.head_sha }},ghcr.io/${{ github.repository_owner }}/handovermind-frontend:latest
 
       - name: Deploy to production host
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
         run: |
-          echo "Deploying handovermind-backend:${{ github.sha }} and handovermind-frontend:${{ github.sha }}"
+          echo "Deploying handovermind-backend:${{ github.event.workflow_run.head_sha }} and handovermind-frontend:${{ github.event.workflow_run.head_sha }}"
           echo "Replace this step with your actual deploy mechanism:"
           echo "  - SSH + docker compose pull && up -d, OR"
           echo "  - a managed platform's CLI (Render/Fly/ECS/Azure/GCP), OR"
